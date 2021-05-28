@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand ms-1" href="{% url 'movies:index' %}">MovieTalk</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarColor03">
+      <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href=" {% url 'chat:index' %} ">Community</a>
+          </li>
+        {% if request.user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ user.username }}님의 프로필</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{% url 'accounts:profile' user.username %}">프로필 보기</a>
+              <a class="dropdown-item" href="{% url 'accounts:update' %}">회원정보수정</a>
+              <a class="dropdown-item" href="{% url 'accounts:change_password' %}">비밀번호변경</a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <form action="{% url 'accounts:logout' %}" method="POST">
+              {% csrf_token %}
+              <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Logout</button>
+            </form>
+          </li>
+       
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href=" {% url 'accounts:login' %} ">Login</a>
+          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" href=" {% url 'accounts:signup' %} ">Signup</a>
+          </li> -->
+        {% endif %}
+          
+      </ul>
+      <form class="d-flex me-2" action="{% url 'movies:search' %}" method="GET">
+        <input class="form-control me-sm-2" type="text" name="search-word" placeholder="어떤 영화를 찾으세요?">
+        <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+</nav>

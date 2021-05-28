@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div>
+    <div class="row">
+      <h4 class="col-auto" style="display: inline">제목 : {{ review.title }}</h4>
+      {% if request.user == review.user %}
+      <div class="col-auto offset-6" style="display: inline">
+        <form style="display: inline" action=" {% url 'community:update' review.pk %} ">
+          <button class="btn btn-outline-secondary">UPDATE</button>
+        </form>
+        <form style="display: inline" action=" {% url 'community:delete' review.pk %} " method="POST">
+          {% csrf_token %}
+          <button class="btn btn-outline-danger">DELETE</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    <hr>
+    <form style="display: inline" class="like-form" data-review-id="{{ review.pk }}">
+      {% csrf_token %}
+      {% if user in review.like_users.all %}
+        <button class="btn btn-link">
+          <i class="fas fa-heart fa-lg" style="color:crimson;" id="like-{{ review.pk }}"></i>
+        </button>
+      {% else %}
+        <button class="btn btn-link">
+          <i class="fas fa-heart fa-lg" style="color:black;" id="like-{{ review.pk }}"></i>
+        </button>
+      {% endif %}
+    </form>
+    <span id="like-count-{{ review.pk }}">{{ review.like_users.all|length }}</span> 명이 이 글을 좋아합니다. <br>
+  </div>
+  <hr>
+  <div>
+    <p>{{ review.content }}</p>
+    <a href="{% url 'movies:detail' review.movie.pk %}">뒤로 가기</a>
+  </div>
+  <hr>
+  <div>
+    <form action=" {% url 'community:comments_create' review.pk %} " method="POST">
+      {% csrf_token %}
+      <span>{{ comment_form }}</span>
+      <button  type="submit" class="btn btn-secondary ms-3">댓글 작성</button>
+    </form>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">작성자</th>
+        <th scope="col">댓글</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for comment in comments  %}
+        <tr class="table-light">
+        <th scope="row">{{ comment.user.username }}</th>
+        <td>{{ comment.content}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+  
+    const forms = document.querySelectorAll('.like-form')
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+    forms.forEach((form)=>{
+      form.addEventListener('submit', (event)=>{
+        event.preventDefault()
+        const reviewId = event.target.dataset.reviewId 
+        const URL = window.location.href + 'like/' 
+      
+        const requestData = {
+          method: 'post', 
+          url: URL, 
+          headers: {'X-CSRFToken': csrftoken}, 
+        }
+
+        axios(requestData)
+          .then((response)=>{
+
+            const count = response.data.count 
+            const liked = response.data.liked 
+
+            const likeButton = document.querySelector(`#like-${reviewId}`)
+            if (liked) {
+              likeButton.style = "color:crimson;"
+            }
+            else {
+              likeButton.style = "color:black;"
+            }
+            const likeCount = document.querySelector(`#like-count-${reviewId}`)
+            likeCount.innerText = count
+          })
+          .catch((error)=>{
+            console.log(error.response)
+          })
+      
+      })
+    })
+  </script>
+{% endblock content %}
+
